@@ -1,0 +1,49 @@
+---
+- name: download nomad                                                                           
+  get_url:
+    url: https://releases.hashicorp.com/nomad/0.4.1/nomad_0.4.1_linux_amd64.zip
+    validate_certs: yes
+    dest: /tmp/nomad.zip
+- name: install nomad
+  unarchive:
+    src: /tmp/nomad.zip
+    copy: no
+    dest: /usr/local/bin
+- name: install nomad initscript
+  copy:
+    src: nomad.service
+    dest: /etc/systemd/system/nomad.service
+- name: create nomad config dir
+  file:
+    name: /etc/nomad
+    state: directory
+- name: create nomad data dir
+  file:
+    name: /var/lib/nomad
+    state: directory
+- name: install nomad config
+  copy:
+    src: nomad.hcl
+    dest: /etc/nomad/nomad.hcl
+- name: enable nomad
+  service:
+    name: nomad
+    enabled: yes
+- name: copy bootstrap script
+  copy:
+    src: import_nomad_jobs.py
+    mode: 755
+    dest: /usr/local/bin/import_nomad_jobs.py
+- name: copy bootstrap unit
+  copy:
+    src: import_nomad_jobs.service
+    mode: 644
+    dest: /etc/systemd/system/import_nomad_jobs.service
+- name: enable nomad bootstrap
+  service:
+    name: import_nomad_jobs
+    enabled: yes
+- name: sync nomad jobs
+  copy:
+    src: jobs
+    dest: /etc/nomad/

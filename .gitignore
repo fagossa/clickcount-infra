@@ -1,0 +1,6 @@
+*.tfstate*
+*.retry
+credentials
+.vagrant
+.cache
+tests/__pycache__
